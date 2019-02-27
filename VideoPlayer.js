@@ -5,6 +5,7 @@ import {
     TouchableHighlight,
     ImageBackground,
     PanResponder,
+    I18nManager,
     StyleSheet,
     Touchable,
     Animated,
@@ -53,12 +54,12 @@ export default class VideoPlayer extends Component {
             volumeTrackWidth: 0,
             lastScreenPress: 0,
             volumeFillWidth: 0,
-            seekerFillWidth: 0,
+            seekerFillWidth:  0,
             showControls: this.props.showOnStart,
             volumePosition: 0,
             seekerPosition: 0,
             volumeOffset: 0,
-            seekerOffset: 0,
+            seekerOffset:  0,
             seeking: false,
             loading: false,
             currentTime: 0,
@@ -112,7 +113,7 @@ export default class VideoPlayer extends Component {
             seekPanResponder: PanResponder,
             controlTimeout: null,
             volumeWidth: 150,
-            iconOffset: 0,
+            iconOffset: 7,
             seekWidth: 0,
             ref: Video,
         };
@@ -646,7 +647,7 @@ export default class VideoPlayer extends Component {
      * @return {float} volume handle position in px based on volume
      */
     calculateVolumePositionFromVolume() {
-        return this.player.volumeWidth * this.state.volume;
+        return this.player.volumeWidth / this.state.volume;
     }
 
 
@@ -691,7 +692,7 @@ export default class VideoPlayer extends Component {
         const position = this.calculateVolumePositionFromVolume();
         let state = this.state;
         this.setVolumePosition( position );
-        state.volumeOffset = position;
+        state.volumeOffset =  position;
         this.mounted = true;
 
         this.setState( state );
@@ -731,7 +732,7 @@ export default class VideoPlayer extends Component {
             /**
              * When panning, update the seekbar position, duh.
              */
-            onPanResponderMove: ( evt, gestureState ) => {
+            onPanResponderMove: ( evt, gestureState ) => {  
                 const position = this.state.seekerOffset + gestureState.dx;
                 this.setSeekerPosition( position );
             },
@@ -775,7 +776,12 @@ export default class VideoPlayer extends Component {
              */
             onPanResponderMove: ( evt, gestureState ) => {
                 let state = this.state;
-                const position = this.state.volumeOffset + gestureState.dx;
+                let position;
+                if(I18nManager.isRTL){
+                    position = this.state.volumeOffset + (1 - gestureState.dx);
+                }else{
+                    position = this.state.volumeOffset + gestureState.dx;
+                }
 
                 this.setVolumePosition( position );
                 state.volume = this.calculateVolumeFromVolumePosition();
@@ -1191,7 +1197,7 @@ const styles = {
     }),
     controls: StyleSheet.create({
         row: {
-            flexDirection: 'row',
+            flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
             alignItems: 'center',
             justifyContent: 'space-between',
             height: null,
@@ -1217,7 +1223,7 @@ const styles = {
             textAlign: 'center',
         },
         pullRight: {
-            flexDirection: 'row',
+            flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
             alignItems: 'center',
             justifyContent: 'center',
         },
@@ -1235,7 +1241,7 @@ const styles = {
             alignSelf: 'stretch',
             alignItems: 'center',
             justifyContent: 'space-between',
-            flexDirection: 'row',
+            flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
             width: null,
             margin: 12,
             marginBottom: 18,
@@ -1249,10 +1255,10 @@ const styles = {
             marginBottom: 0,
         },
         volume: {
-            flexDirection: 'row',
+            flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
         },
         fullscreen: {
-            flexDirection: 'row',
+            flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row',
         },
         playPause: {
             position: 'relative',
@@ -1303,8 +1309,8 @@ const styles = {
             marginLeft: -24,
             padding: 16,
         },
-        icon: {
-            marginLeft:7
+        icon:{
+            transform : I18nManager.isRTL ? [{ rotate: '180deg'}] : [{ rotate: '0deg'}]
         }
     }),
     seekbar: StyleSheet.create({
@@ -1312,19 +1318,21 @@ const styles = {
             alignSelf: 'stretch',
             height: 28,
             marginLeft: 20,
-            marginRight: 20
+            marginRight: 20,
+            flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row'
         },
         track: {
             backgroundColor: '#333',
             height: 1,
             position: 'relative',
             top: 14,
-            width: '100%'
+            width: '100%',
+            flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row'
         },
         fill: {
             backgroundColor: '#FFF',
             height: 1,
-            width: '100%'
+            width: '100%',
         },
         handle: {
             position: 'absolute',
@@ -1335,7 +1343,8 @@ const styles = {
         circle: {
             borderRadius: 12,
             position: 'relative',
-            top: 8, left: 8,
+            top: 8, 
+            left: 8,
             height: 12,
             width: 12,
         },
